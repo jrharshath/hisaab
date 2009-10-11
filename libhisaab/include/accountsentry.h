@@ -5,8 +5,9 @@
 
 class AccountsEntry : public Entry {
 public:
+	AccountsEntry();
 	AccountsEntry(float amount, QString name, QString message, QDateTime dt=QDateTime::currentDateTime() );
-	AccountsEntry(QString fileNotation);
+	bool fromString(QString strNotation);
 
 	QString getName();
 	void setName(const QString& name);

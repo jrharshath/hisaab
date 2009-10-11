@@ -6,8 +6,7 @@
 class TranlogEntry : public Entry {
 public:
 	TranlogEntry(float amount, QString message, QDateTime dt=QDateTime::currentDateTime() );
-	TranlogEntry(QString fileNotation);
-
+	bool fromString(QString strNotation);
 	QString toString();
 };
 

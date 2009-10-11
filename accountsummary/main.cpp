@@ -7,15 +7,22 @@
 QTextStream out(stdout);
 
 int main(int argc, char* argv[]) {
+	char* progname = argv[0];
 	QFile* accounts = getConfigFile("accounts", QIODevice::ReadOnly);
 	if( accounts==0 ) {
-		out << argv[0] << ": could not read accounts log \"~/.hisaab/accounts\"! Aborting..\n";
+		out << progname << ": could not read accounts log \"~/.hisaab/accounts\"! Aborting.\n";
 		return -1;
 	}
 	QMap<QString,float> summary;
+	bool ok=true;
 	while(accounts->bytesAvailable()) {
 		QString line = accounts->readLine();
-		AccountsEntry e(line);
+		AccountsEntry e;
+		ok = e.fromString(line);
+		if( !ok ) {
+			out << progname << ": invalid accounts log \"~/.hisaab/accounts\"! Aborting.\n";
+			return -1;
+		}
 		QString name = e.getName();
 		if( summary.contains(name) )
 			summary[name] += e.getAmount();

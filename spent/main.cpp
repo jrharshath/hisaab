@@ -18,12 +18,13 @@ int main(int argc, char* argv[]) {
 	QString amountstring, message;
 	QStringList tags;
 
+	bool ok=true;
 	amountstring = QString(argv[1]);
-	if( !isNumeric(amountstring) ) {
-		out << progname << ": amount must be number!\n";
+	amount = amountstring.toFloat(&ok);
+	if( !ok ) {
+		out << progname << ": amount must be number! Aborting.\n";
 		return -1;
 	}
-	amount = stringToFloat(amountstring);
 
 	int i=2; // now read in "message"
 	message = readMessage(argc, argv, i, HasTags::TAG_STARTER.toAscii());
@@ -35,7 +36,7 @@ int main(int argc, char* argv[]) {
 
 	QFile* tranlog = getConfigFile("tranlog");
 	if( tranlog==0 ) {
-		out << progname << ": could not read transaction log \"~/.hisaab/tranlog\"! Aborting..\n";
+		out << progname << ": could not read transaction log \"~/.hisaab/tranlog\"! Aborting.\n";
 		return -1;
 	}
 

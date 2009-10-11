@@ -1,0 +1,6 @@
+syntaxes supported:
+1) gave <amount> <person> <message> <~tags>
+
+2) gave <amount> <person1>:<person2>:<person3> [n1:n2:n3] <message> <~tags>
+   means gave <amount> to persons <person1>:<person2>:<person3> in the ratio n1:n2:n3.
+   ratio is optional. if omitted, the amount will be split equally among the persons.

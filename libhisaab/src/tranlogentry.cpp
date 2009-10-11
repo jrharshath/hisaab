@@ -1,32 +1,31 @@
 #include "tranlogentry.h"
 #include "utils.h"
+#include "hisaabdatetime.h"
 
 #include <QDateTime>
 
 TranlogEntry::TranlogEntry(float amount, QString message, QDateTime dt) {
 	setAmount(amount);
 	setMessage(message);
-	setDateTime(dt);
+	setDateTime(HisaabDateTime(dt));
 }
-TranlogEntry::TranlogEntry(QString fileNotation) {
-	QStringList parts = fileNotation.split("\t");
+bool TranlogEntry::fromString(QString strNotation) {
+	QStringList parts = strNotation.split("\t");
+	Q_ASSERT_X(parts.size()==4, "TranlogEntry::fromString(Qstring)", "Invalid file format!");
+
 
 	QString dtstring = parts.at(0);
 	QString amountstring = parts.at(1);
 	QString messagestring = parts.at(2);
 	QString tagslist = parts.at(3);
 
-	int d,m,y,H,M;
-	QStringList dtparts = dtstring.split(QRegExp("[\\-:]"),QString::SkipEmptyParts);
-	d = stringToInt(dtparts.at(0));
-	m = stringToInt(dtparts.at(1));
-	y = stringToInt(dtparts.at(2));
-	H = stringToInt(dtparts.at(3));
-	M = stringToInt(dtparts.at(4));
-	QDateTime localdt( QDate(y,m,d), QTime(H,M,0,0) );
-	setDateTime(localdt);
+	HisaabDateTime date;
+	bool ok = date.fromString(dtstring);
+	if( !ok ) return false;
+	setDateTime(date);
 
-	setAmount( stringToFloat(amountstring) );
+	if( !isFloat(amountstring) ) return false;
+	setAmount( amountstring.toFloat() );
 
 	setMessage(messagestring);
 
@@ -34,10 +33,11 @@ TranlogEntry::TranlogEntry(QString fileNotation) {
 	foreach(QString tag, tags) {
 		addTag(tag);
 	}
+	return true;
 }
 
 QString TranlogEntry::toString() {
-	QString datetime = getDateTime().toString("dd-MM-yyyy-hh:mm");
+	QString datetime = getDateTime().toString();
 	QString final = datetime+'\t'+QString::number(getAmount())+'\t'+getMessage()+'\t'+getJoinedTags(" ")+'\n';
 	return final;
 }

@@ -1,17 +1,23 @@
 #include "accountsentry.h"
+
+#include "hisaabdatetime.h"
 #include "utils.h"
 
 #include <QDateTime>
-
+AccountsEntry::AccountsEntry() {
+	setAmount(0);
+	setName("");
+	setMessage("");
+}
 AccountsEntry::AccountsEntry(float amount, QString name, QString message, QDateTime dt) {
 	setAmount(amount);
 	setName(name);
 	setMessage(message);
 	setDateTime(dt);
 }
-AccountsEntry::AccountsEntry(QString fileNotation) {
-	QStringList parts = fileNotation.split("\t");
-	Q_ASSERT_X(parts.size()==5, "AccountsEntry::AccountsEntry(Qstring)", "Invalid file format!");
+bool AccountsEntry::fromString(QString strNotation) {
+	QStringList parts = strNotation.split("\t");
+	Q_ASSERT_X(parts.size()==5, "AccountsEntry::fromString(Qstring)", "Invalid file format!");
 
 	QString dtstring = parts.at(0);
 	QString amountstring = parts.at(1);
@@ -19,17 +25,13 @@ AccountsEntry::AccountsEntry(QString fileNotation) {
 	QString messagestring = parts.at(3);
 	QString tagslist = parts.at(4);
 
-	int d,m,y,H,M;
-	QStringList dtparts = dtstring.split(QRegExp("[\\-:]"),QString::SkipEmptyParts);
-	d = stringToInt(dtparts.at(0));
-	m = stringToInt(dtparts.at(1));
-	y = stringToInt(dtparts.at(2));
-	H = stringToInt(dtparts.at(3));
-	M = stringToInt(dtparts.at(4));
-	QDateTime localdt( QDate(y,m,d), QTime(H,M,0,0) );
-	setDateTime(localdt);
+	HisaabDateTime date;
+	bool ok = date.fromString(dtstring);
+	if( !ok ) return false;
+	setDateTime(date);
 
-	setAmount( stringToFloat(amountstring) );
+	if( !isFloat(amountstring) ) return false;
+	setAmount( amountstring.toFloat() );
 	setName(name);
 	setMessage(messagestring);
 
@@ -37,9 +39,10 @@ AccountsEntry::AccountsEntry(QString fileNotation) {
 	foreach(QString tag, tags) {
 		addTag(tag);
 	}
+	return true;
 }
 QString AccountsEntry::toString() {
-	QString datetime = getDateTime().toString("dd-MM-yyyy-hh:mm");
+	QString datetime = getDateTime().toString();
 	QString final = datetime+'\t'+QString::number(getAmount())+'\t'+getName()+'\t'+getMessage()+'\t'+getJoinedTags(" ")+'\n';
 	return final;
 }
